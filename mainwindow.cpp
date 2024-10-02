@@ -9,7 +9,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
-  this->setWindowIcon(QIcon(":/icons/app_icon.ico"));
   connect(ui->selectXrayPathBtn, &QPushButton::clicked, this,
           &MainWindow::onSelectXrayPathBtnClicked);
   connect(ui->selectDataPathBtn, &QPushButton::clicked, this,
