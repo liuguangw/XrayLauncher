@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include "./launcher_config.h"
+#include <QMainWindow>
 #include <QProcess>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
@@ -32,6 +32,8 @@ private slots:
     void onConfigPathChanged(const QString &text);
     //启动
     void onRunBtnClicked();
+    //停止
+    void onStopBtnClicked();
     //xray进程结束的处理
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
     //显示主窗口
@@ -54,6 +56,8 @@ private:
     //初始化托盘
     void initSystemTray();
     void killXrayProcess();
+    //改变运行显示状态
+    void changeRunningState(bool isRunning);
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::onConfigPathChanged);
   connect(ui->runBtn, &QPushButton::clicked, this,
           &MainWindow::onRunBtnClicked);
+  connect(ui->stopBtn, &QPushButton::clicked, this,
+          &MainWindow::onStopBtnClicked);
   this->initSystemTray();
   this->loadLauncherConfig();
 }
@@ -109,9 +111,12 @@ void MainWindow::onRunBtnClicked() {
   QStringList arguments;
   arguments << "-confdir" << configPath;
   this->xrayProcess->start(xrayPath, arguments);
+  this->changeRunningState(true);
   connect(this->xrayProcess, &QProcess::finished, this,
           &MainWindow::onProcessFinished);
 }
+
+void MainWindow::onStopBtnClicked() { this->killXrayProcess(); }
 
 void MainWindow::onProcessFinished(int exitCode,
                                    QProcess::ExitStatus exitStatus) {
@@ -119,6 +124,7 @@ void MainWindow::onProcessFinished(int exitCode,
              &MainWindow::onProcessFinished);
   delete this->xrayProcess;
   this->xrayProcess = nullptr;
+  this->changeRunningState(false);
   if (exitStatus != QProcess::ExitStatus::NormalExit) {
     qDebug() << "xray CrashExit";
   }
@@ -212,6 +218,17 @@ void MainWindow::killXrayProcess() {
       this->xrayProcess->waitForFinished();
     }
   }
+}
+
+void MainWindow::changeRunningState(bool isRunning) {
+  ui->xrayPathEdit->setEnabled(!isRunning);
+  ui->selectXrayPathBtn->setEnabled(!isRunning);
+  ui->dataPathEdit->setEnabled(!isRunning);
+  ui->selectDataPathBtn->setEnabled(!isRunning);
+  ui->configPathEdit->setEnabled(!isRunning);
+  ui->selectConfigPathBtn->setEnabled(!isRunning);
+  ui->runBtn->setEnabled(!isRunning);
+  ui->stopBtn->setEnabled(isRunning);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
