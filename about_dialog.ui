@@ -16,23 +16,11 @@
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
    <item alignment="Qt::AlignTop">
     <widget class="QLabel" name="logo">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(:/icons/app_icon.png);</string>
-     </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="app.qrc">:/icons/app_icon.png</pixmap>
      </property>
     </widget>
    </item>
@@ -116,7 +104,9 @@ QPushButton{
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="app.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
