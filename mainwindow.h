@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -48,9 +49,11 @@ private:
     LauncherConfig launcherConfig;
     QSystemTrayIcon* systemTrayIcon;
     QProcess* xrayProcess = nullptr;
+    QDateTime xrayStartedTime;
     //是否为托盘区域调用关闭
     bool isSystemTrayClose = false;
     void showErrorMessage(const QString &text);
+    void showErrorLogDialog(const QString &text);
     void loadLauncherConfig();
     void saveLauncherConfig();
     //初始化托盘

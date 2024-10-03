@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "error_log_dialog.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileDialog>
@@ -72,12 +73,12 @@ void MainWindow::onConfigPathChanged(const QString &text) {
 void MainWindow::onRunBtnClicked() {
   QString xrayPath = this->launcherConfig.xrayPath;
   if (xrayPath.isEmpty()) {
-    showErrorMessage(tr("xray程序路径不能为空"));
+    this->showErrorMessage(tr("xray程序路径不能为空"));
     return;
   }
   QString dataPath = this->launcherConfig.dataPath;
   if (dataPath.isEmpty()) {
-    showErrorMessage(tr("资源文件夹路径不能为空"));
+    this->showErrorMessage(tr("资源文件夹路径不能为空"));
     return;
   }
   // 检查资源文件夹
@@ -86,13 +87,14 @@ void MainWindow::onRunBtnClicked() {
   for (int i = 0; i < 2; i++) {
     geoFilePath = dataPath + "/" + checkDataFiles[i];
     if (!QFile::exists(geoFilePath)) {
-      showErrorMessage(tr("资源文件夹下未找到文件%1").arg(checkDataFiles[i]));
+      this->showErrorMessage(
+          tr("资源文件夹下未找到文件%1").arg(checkDataFiles[i]));
       return;
     }
   }
   QString configPath = this->launcherConfig.configPath;
   if (configPath.isEmpty()) {
-    showErrorMessage(tr("配置文件夹路径不能为空"));
+    this->showErrorMessage(tr("配置文件夹路径不能为空"));
     return;
   }
   // 工作目录
@@ -105,14 +107,17 @@ void MainWindow::onRunBtnClicked() {
   this->xrayProcess = new QProcess(this);
   this->xrayProcess->setWorkingDirectory(workingDir.path());
   this->xrayProcess->setProcessEnvironment(env);
+  this->xrayProcess->setProcessChannelMode(
+      QProcess::ProcessChannelMode::MergedChannels);
   // this->xrayProcess->setStandardErrorFile("./error.log");
   // this->xrayProcess->setStandardOutputFile("./output.log");
   QStringList arguments;
   arguments << "-confdir" << configPath;
-  this->xrayProcess->start(xrayPath, arguments);
-  this->changeRunningState(true);
   connect(this->xrayProcess, &QProcess::finished, this,
           &MainWindow::onProcessFinished);
+  this->xrayStartedTime = QDateTime::currentDateTimeUtc();
+  this->xrayProcess->start(xrayPath, arguments);
+  this->changeRunningState(true);
 }
 
 void MainWindow::onStopBtnClicked() { this->killXrayProcess(); }
@@ -121,6 +126,14 @@ void MainWindow::onProcessFinished(int exitCode,
                                    QProcess::ExitStatus exitStatus) {
   disconnect(this->xrayProcess, &QProcess::finished, this,
              &MainWindow::onProcessFinished);
+  QString errorMessage;
+  QDateTime finishedTime = QDateTime::currentDateTimeUtc();
+  // 5s内进程结束了，显示错误信息
+  if (this->xrayStartedTime.secsTo(finishedTime) <= 5) {
+    QByteArray errorData = this->xrayProcess->readAllStandardOutput();
+    errorMessage = QString::fromUtf8(errorData);
+    // qDebug()<<errorMessage;
+  }
   delete this->xrayProcess;
   this->xrayProcess = nullptr;
   this->changeRunningState(false);
@@ -128,6 +141,9 @@ void MainWindow::onProcessFinished(int exitCode,
     qDebug() << "xray CrashExit";
   }
   qDebug() << "xray finished with code" << exitCode;
+  if (!errorMessage.isNull()) {
+    this->showErrorLogDialog(errorMessage);
+  }
 }
 
 void MainWindow::onShowMainWindow() {
@@ -159,6 +175,12 @@ void MainWindow::onSystemTrayActivated(
 
 void MainWindow::showErrorMessage(const QString &text) {
   QMessageBox::critical(this, tr("出错了"), text);
+}
+
+void MainWindow::showErrorLogDialog(const QString &text) {
+  ErrorLogDialog dialog(this);
+  dialog.setLogMessage(text);
+  dialog.exec();
 }
 
 void MainWindow::loadLauncherConfig() {
@@ -233,7 +255,6 @@ void MainWindow::changeRunningState(bool isRunning) {
 void MainWindow::closeEvent(QCloseEvent *event) {
   // 关闭和隐藏都保存配置
   this->saveLauncherConfig();
-  event->accept();
   if (this->isSystemTrayClose) {
     // 从托盘区关闭时,先kill xray线程
     this->killXrayProcess();
