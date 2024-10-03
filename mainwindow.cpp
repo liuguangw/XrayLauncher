@@ -6,6 +6,9 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
+#ifdef Q_OS_WIN
+#include <QSettings>
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -26,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::onRunBtnClicked);
   connect(ui->stopBtn, &QPushButton::clicked, this,
           &MainWindow::onStopBtnClicked);
+  // 获取自启动的设置
+  if (this->isAutoRunSetting()) {
+    ui->autoRunCheckBox->setCheckState(Qt::CheckState::Checked);
+  }
+  connect(ui->autoRunCheckBox, &QCheckBox::stateChanged, this,
+          &MainWindow::onAutoRunChanged);
   this->initSystemTray();
   this->loadLauncherConfig();
 }
@@ -42,8 +51,14 @@ void MainWindow::runMain(bool silentMode) {
 }
 
 void MainWindow::onSelectXrayPathBtnClicked() {
-  QString xrayPath = QFileDialog::getOpenFileName(
-      this, tr("选择xray可执行文件"), "", tr("xray程序 (xray.exe)"));
+  QString filter;
+#ifdef Q_OS_WIN
+  filter = tr("xray程序 (xray.exe)");
+#else
+  filter = tr("xray程序 (xray)");
+#endif
+  QString xrayPath =
+      QFileDialog::getOpenFileName(this, tr("选择xray可执行文件"), "", filter);
   if (!xrayPath.isNull()) {
     ui->xrayPathEdit->setText(QDir::toNativeSeparators(xrayPath));
   }
@@ -182,6 +197,15 @@ void MainWindow::onSystemTrayActivated(
   }
 }
 
+void MainWindow::onAutoRunChanged(int state) {
+  // qDebug() << "auto run changed" << state;
+  if ((int)Qt::CheckState::Checked == state) {
+    this->setAutoRun(true);
+  } else {
+    this->setAutoRun(false);
+  }
+}
+
 void MainWindow::showErrorMessage(const QString &text) {
   QMessageBox::critical(this, tr("出错了"), text);
 }
@@ -261,6 +285,32 @@ void MainWindow::changeRunningState(bool isRunning) {
   ui->stopBtn->setEnabled(isRunning);
 }
 
+bool MainWindow::isAutoRunSetting() {
+#ifdef Q_OS_WIN
+  QSettings settings(REG_RUN_PATH, QSettings::NativeFormat);
+  return settings.contains(REG_RUN_KEY);
+#endif
+  return false;
+}
+
+void MainWindow::setAutoRun(bool isAutoRun) {
+#ifdef Q_OS_WIN
+  QSettings settings(REG_RUN_PATH, QSettings::NativeFormat);
+  if (isAutoRun) {
+    // 设置开机自启动
+    QString exePath =
+        QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    QString regValue = QString("\"%1\" --silent").arg(exePath);
+    settings.setValue(REG_RUN_KEY, regValue);
+  } else if (settings.contains(REG_RUN_KEY)) {
+    // 取消开机自启动
+    settings.remove(REG_RUN_KEY);
+  }
+#else
+  this->showErrorMessage(tr("当前系统还不支持此操作"));
+#endif
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
   // 关闭和隐藏都保存配置
   this->saveLauncherConfig();
@@ -268,7 +318,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     // 从托盘区关闭时,先kill xray线程
     this->killXrayProcess();
     event->accept();
-    qDebug() << "close MainWindow";
+    // qDebug() << "close MainWindow";
   } else {
     if (!this->isHidden()) {
       this->hide();

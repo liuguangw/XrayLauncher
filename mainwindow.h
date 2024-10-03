@@ -42,8 +42,16 @@ private slots:
   void onExitApp();
   void
   onSystemTrayActivated(QSystemTrayIcon::ActivationReason activationReason);
+  // 自启动勾选变化事件
+  void onAutoRunChanged(int state);
 
 private:
+#ifdef Q_OS_WIN
+  // 自启动的注册表位置
+  const char *REG_RUN_PATH =
+      "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+  const char *REG_RUN_KEY = "XrayLauncher";
+#endif
   Ui::MainWindow *ui;
   QString launcherConfigPath;
   LauncherConfig launcherConfig;
@@ -61,6 +69,9 @@ private:
   void killXrayProcess();
   // 改变运行显示状态
   void changeRunningState(bool isRunning);
+  // 判断当前是否设置了开机自启动
+  bool isAutoRunSetting();
+  void setAutoRun(bool isAutoRun);
 
 protected:
   void closeEvent(QCloseEvent *event) override;
