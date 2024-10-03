@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "about_dialog.h"
 #include "error_log_dialog.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -182,8 +181,14 @@ void MainWindow::onShowMainWindow() {
 }
 
 void MainWindow::onShowAboutDialog() {
-  AboutDialog dialog(this);
-  dialog.exec();
+  if (this->aboutDialog == nullptr) {
+    this->aboutDialog = new AboutDialog(this);
+  }
+  if (this->aboutDialog->isHidden()) {
+    this->aboutDialog->open();
+  } else if (!this->aboutDialog->isActiveWindow()) {
+    this->aboutDialog->activateWindow();
+  }
 }
 
 void MainWindow::onExitApp() {

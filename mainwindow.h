@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "./launcher_config.h"
+#include "about_dialog.h"
 #include <QCloseEvent>
 #include <QDateTime>
 #include <QMainWindow>
@@ -54,6 +55,7 @@ private:
   const char *REG_RUN_KEY = "XrayLauncher";
 #endif
   Ui::MainWindow *ui;
+  AboutDialog *aboutDialog = nullptr;
   QString launcherConfigPath;
   LauncherConfig launcherConfig;
   QSystemTrayIcon *systemTrayIcon;
