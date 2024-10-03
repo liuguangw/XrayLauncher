@@ -39,6 +39,7 @@ private slots:
   // 显示主窗口
   void onShowMainWindow();
   // 托盘区
+  void onShowAboutDialog();
   void onExitApp();
   void
   onSystemTrayActivated(QSystemTrayIcon::ActivationReason activationReason);

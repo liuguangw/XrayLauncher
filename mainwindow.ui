@@ -13,8 +13,9 @@
   <property name="windowTitle">
    <string>xray启动器</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QLabel{
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QLabel{
   min-width: 100px;
   min-height: 40px;
 }
@@ -30,8 +31,7 @@ QPushButton#runBtn,QPushButton#stopBtn{
   min-width: 133px;
   min-height: 46px;
 }</string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
+   </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0" colspan="3">
      <layout class="QGridLayout" name="gridLayout">

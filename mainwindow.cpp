@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "about_dialog.h"
 #include "error_log_dialog.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -180,6 +181,11 @@ void MainWindow::onShowMainWindow() {
   }
 }
 
+void MainWindow::onShowAboutDialog() {
+  AboutDialog dialog(this);
+  dialog.exec();
+}
+
 void MainWindow::onExitApp() {
   this->isSystemTrayClose = true;
   // 隐藏状态下不能关闭
@@ -246,6 +252,8 @@ void MainWindow::initSystemTray() {
   QMenu *menu = new QMenu(this);
   QAction *showMainAction = new QAction("打开主窗口", this);
   menu->addAction(showMainAction);
+  QAction *showAboutAction = new QAction("关于", this);
+  menu->addAction(showAboutAction);
   QAction *exitAction = new QAction("退出", this);
   menu->addSeparator();
   menu->addAction(exitAction);
@@ -255,6 +263,8 @@ void MainWindow::initSystemTray() {
           &MainWindow::onSystemTrayActivated);
   connect(showMainAction, &QAction::triggered, this,
           &MainWindow::onShowMainWindow);
+  connect(showAboutAction, &QAction::triggered, this,
+          &MainWindow::onShowAboutDialog);
   connect(exitAction, &QAction::triggered, this, &MainWindow::onExitApp);
   this->systemTrayIcon->show();
 }
