@@ -32,6 +32,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::runMain(bool silentMode) {
+  if (silentMode) {
+    // 安静模式不显示主界面,并且自动运行xray
+    this->onRunBtnClicked();
+  } else {
+    this->show();
+  }
+}
+
 void MainWindow::onSelectXrayPathBtnClicked() {
   QString xrayPath = QFileDialog::getOpenFileName(
       this, tr("选择xray可执行文件"), "", tr("xray程序 (xray.exe)"));

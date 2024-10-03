@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
 )
+string(TIMESTAMP XRAY_LAUNCHER_BUILD_TIME)
+configure_file(version.h.in "${CMAKE_CURRENT_SOURCE_DIR}/version.h" @ONLY)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(XrayLauncher
@@ -27,6 +29,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         app.qrc
         logo.rc
         error_log_dialog.h error_log_dialog.cpp error_log_dialog.ui
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET xray_launcher APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
