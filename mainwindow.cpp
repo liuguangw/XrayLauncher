@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
   if (this->isAutoRunSetting()) {
     ui->autoRunCheckBox->setCheckState(Qt::CheckState::Checked);
   }
-  connect(ui->autoRunCheckBox, &QCheckBox::stateChanged, this,
+  connect(ui->autoRunCheckBox, &QCheckBox::checkStateChanged, this,
           &MainWindow::onAutoRunChanged);
   this->initSystemTray();
   this->loadLauncherConfig();
@@ -208,9 +208,9 @@ void MainWindow::onSystemTrayActivated(
   }
 }
 
-void MainWindow::onAutoRunChanged(int state) {
+void MainWindow::onAutoRunChanged(Qt::CheckState state) {
   // qDebug() << "auto run changed" << state;
-  if ((int)Qt::CheckState::Checked == state) {
+  if (state == Qt::CheckState::Checked) {
     this->setAutoRun(true);
   } else {
     this->setAutoRun(false);

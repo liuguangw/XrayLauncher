@@ -45,7 +45,7 @@ private slots:
   void
   onSystemTrayActivated(QSystemTrayIcon::ActivationReason activationReason);
   // 自启动勾选变化事件
-  void onAutoRunChanged(int state);
+  void onAutoRunChanged(Qt::CheckState state);
 
 private:
 #ifdef Q_OS_WIN
